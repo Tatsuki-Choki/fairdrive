@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Plus, X, ChevronRight } from "lucide-react";
+import { Plus, X, ChevronRight, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { fetchGasPriceMock } from "../services/gasPrice";
 import GroupSharePopup from "./GroupSharePopup";
 import { generateGroupId } from "../utils/generateGroupId";
@@ -10,6 +11,7 @@ interface FrontPageNewProps {
 }
 
 export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
+  const navigate = useNavigate();
   const [groupName, setGroupName] = useState("");
   const [memberName, setMemberName] = useState("");
   const [members, setMembers] = useState<string[]>([]);
@@ -328,15 +330,27 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
             </div>
           </motion.div>
 
-          {/* Create Button */}
+          {/* Create Button - Original */}
           <motion.button
             variants={itemVariants}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
             onClick={createGroup}
-            className="w-full rounded-xl bg-light-primary text-dark-base px-4 py-3 font-bold text-base transition-all hover:bg-white shadow-glass active:scale-95"
+            className="w-full rounded-xl bg-light-primary/10 border border-dark-border text-light-primary px-4 py-3 font-bold text-base transition-all hover:bg-light-primary/20 shadow-glass active:scale-95"
           >
-            グループを作成
+            グループを作成（従来版）
+          </motion.button>
+
+          {/* Create Button - Supabase */}
+          <motion.button
+            variants={itemVariants}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => navigate('/create-group')}
+            className="w-full rounded-xl bg-light-primary text-dark-base px-4 py-3 font-bold text-base transition-all hover:bg-white shadow-glass active:scale-95 flex items-center justify-center gap-2"
+          >
+            <Users size={20} />
+            共有グループを作成
           </motion.button>
 
           {/* Footer Text */}

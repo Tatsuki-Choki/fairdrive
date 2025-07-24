@@ -14,7 +14,8 @@
       "Bash(gh repo create:*)",
       "Bash(git push:*)",
       "Bash(vercel:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }

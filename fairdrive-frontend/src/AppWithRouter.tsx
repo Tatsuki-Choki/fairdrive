@@ -7,6 +7,10 @@ import Groups from './components/Groups';
 import SettingsPage from './components/SettingsPage';
 import Settlement from './components/Settlement';
 import History from './components/History';
+import CreateGroup from './components/CreateGroup';
+import GroupDetail from './components/GroupDetail';
+import JoinGroup from './components/JoinGroup';
+import AddExpense from './components/AddExpense';
 import { Home, LayoutDashboard, Users, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -117,6 +121,10 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<AppContent />} />
         <Route path="/group/:groupId" element={<AppContent />} />
+        <Route path="/create-group" element={<CreateGroup />} />
+        <Route path="/group/:shareId" element={<GroupDetail />} />
+        <Route path="/join/:shareId" element={<JoinGroup />} />
+        <Route path="/group/:shareId/add-expense" element={<AddExpense />} />
       </Routes>
     </Router>
   );
