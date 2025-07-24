@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
   ArrowLeft, 
@@ -15,7 +15,8 @@ import {
   Receipt,
   CreditCard,
   ChevronRight,
-  Clock
+  Clock,
+  Smartphone
 } from 'lucide-react'
 import { MonochromeHeader } from './organisms/MonochromeHeader'
 import { MonochromeButton } from './atoms/MonochromeButton'
@@ -159,6 +160,41 @@ const GroupDetail: React.FC = () => {
 
   const calculatePerPerson = () => {
     if (members.length === 0) return 0
+    // 各メンバーが実際に負担すべき金額を計算
+    const memberBalances: { [memberId: string]: number } = {}
+    
+    // 初期化
+    members.forEach(member => {
+      memberBalances[member.id] = 0
+    })
+    
+    // 各支払いについて計算
+    expenses.forEach(expense => {
+      // target_member_idsがない場合は全員で割る
+      const targetCount = expense.target_member_ids?.length || members.length
+      const perPersonAmount = expense.amount / targetCount
+      
+      // 支払った人は負担額から減算
+      if (memberBalances[expense.payer_member_id] !== undefined) {
+        memberBalances[expense.payer_member_id] -= expense.amount
+      }
+      
+      // 対象者に負担額を加算
+      if (expense.target_member_ids && expense.target_member_ids.length > 0) {
+        expense.target_member_ids.forEach(targetId => {
+          if (memberBalances[targetId] !== undefined) {
+            memberBalances[targetId] += perPersonAmount
+          }
+        })
+      } else {
+        // target_member_idsがない場合は全員に加算
+        members.forEach(member => {
+          memberBalances[member.id] += perPersonAmount
+        })
+      }
+    })
+    
+    // 平均的な負担額を返す（簡易的に総額÷人数）
     return Math.floor(calculateTotalExpenses() / members.length)
   }
 
@@ -210,7 +246,7 @@ const GroupDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark-base text-light-primary pb-20">
+    <div className="min-h-screen bg-dark-base text-light-primary pb-32">
       <MonochromeHeader
         title={group.name}
         showBackButton={true}
@@ -233,14 +269,30 @@ const GroupDetail: React.FC = () => {
               <h2 className="text-2xl font-bold text-light-primary mb-1">{group.name}</h2>
               <p className="text-sm text-light-primary/60">{members.length}人のメンバー</p>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleCopyShareUrl}
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              {copied ? <Check size={20} /> : <Share2 size={20} />}
-            </motion.button>
+            <div className="relative">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCopyShareUrl}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                {copied ? <Check size={20} /> : <Share2 size={20} />}
+              </motion.button>
+              
+              {/* コピー完了メッセージ */}
+              <AnimatePresence>
+                {copied && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.8 }}
+                    className="absolute top-full right-0 mt-2 px-3 py-1.5 bg-dark-base/90 backdrop-blur-sm rounded-lg text-xs text-light-primary whitespace-nowrap shadow-lg border border-dark-border"
+                  >
+                    リンクをコピーしました
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
@@ -274,6 +326,7 @@ const GroupDetail: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => navigate(`/group/${shareId}/settlement`)}
             className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 flex flex-col items-center gap-2 font-semibold shadow-glass border border-dark-border"
           >
             <CreditCard size={24} />
@@ -330,7 +383,7 @@ const GroupDetail: React.FC = () => {
         </motion.div>
 
         {/* メンバー一覧 */}
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="mb-6">
           <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
             <Users size={16} />
             メンバー
@@ -343,6 +396,19 @@ const GroupDetail: React.FC = () => {
               </MonochromeCard>
             ))}
           </div>
+        </motion.div>
+
+        {/* PayPayボタン */}
+        <motion.div variants={itemVariants}>
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => window.location.href = 'paypay://'}
+            className="w-full bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 flex items-center justify-center gap-2 font-medium shadow-glass border border-dark-border text-light-primary"
+          >
+            <Smartphone size={20} />
+            <span className="text-sm">PayPayを開く</span>
+          </motion.button>
         </motion.div>
       </motion.div>
     </div>

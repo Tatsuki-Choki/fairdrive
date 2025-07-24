@@ -151,7 +151,7 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
       </motion.header>
 
       {/* Main */}
-      <main className="flex-1 flex justify-center px-3 overflow-y-auto pb-16">
+      <main className="flex-1 flex justify-center px-3 overflow-y-auto pb-24">
         <motion.div 
           variants={containerVariants}
           initial="hidden"
@@ -383,14 +383,6 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
             </motion.div>
           )}
 
-          {/* Footer Text */}
-          <motion.p 
-            variants={itemVariants}
-            className="text-xs text-center text-light-primary/40 pt-4"
-          >
-            ETC履歴連携・AI自動精算<br />
-            目的地到着時にQRコード決済
-          </motion.p>
 
         </motion.div>
       </main>

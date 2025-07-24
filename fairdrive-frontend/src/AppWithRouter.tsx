@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useParams, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useParams, useNavigate, useLocation } from 'react-router-dom';
 import FrontPageNew from './components/FrontPageNew';
 import Dashboard from './components/Dashboard';
 import PaymentRecord from './components/PaymentRecord';
@@ -10,6 +10,7 @@ import History from './components/History';
 import GroupDetail from './components/GroupDetail';
 import JoinGroup from './components/JoinGroup';
 import AddExpense from './components/AddExpense';
+import SettlementCalculator from './components/SettlementCalculator';
 import { Home, LayoutDashboard, Users, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -95,6 +96,68 @@ const AppContent: React.FC = () => {
   );
 };
 
+// ボトムナビゲーションコンポーネント
+const BottomNavigation: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // 現在のページを判定
+  const getCurrentPage = () => {
+    if (location.pathname === '/') return 'front';
+    if (location.pathname.includes('/group/') && !location.pathname.includes('/add-expense')) return 'dashboard';
+    if (location.pathname === '/groups') return 'groups';
+    if (location.pathname === '/settings') return 'settings';
+    return '';
+  };
+  
+  const currentPage = getCurrentPage();
+  
+  // ボトムナビゲーションは常に表示
+  
+  return (
+    <motion.nav 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="fixed bottom-0 left-0 right-0 bg-dark-base/90 backdrop-blur-glass border-t border-dark-border z-50"
+    >
+      <ul className="flex justify-around py-3">
+        {[
+          { icon: Home, label: "ホーム", path: '/' },
+          { icon: LayoutDashboard, label: "ダッシュボード", path: location.pathname.includes('/group/') ? location.pathname : '/dashboard' },
+          { icon: Users, label: "グループ", path: '/groups' },
+          { icon: Settings, label: "設定", path: '/settings' }
+        ].map((item, idx) => {
+          const isActive = 
+            (item.path === '/' && currentPage === 'front') ||
+            (item.label === 'ダッシュボード' && currentPage === 'dashboard') ||
+            (item.path === location.pathname);
+          
+          return (
+            <motion.li 
+              key={idx}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex flex-col items-center gap-1 flex-1 cursor-pointer"
+              onClick={() => navigate(item.path)}
+            >
+              <item.icon 
+                size={20} 
+                className={isActive ? "text-light-primary" : "text-light-primary/60"} 
+              />
+              <span 
+                className={`text-xs ${isActive ? "text-light-primary" : "text-light-primary/60"}`}
+              >
+                {item.label}
+              </span>
+            </motion.li>
+          );
+        })}
+      </ul>
+    </motion.nav>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <Router>
@@ -103,7 +166,11 @@ const App: React.FC = () => {
         <Route path="/group/:shareId" element={<GroupDetail />} />
         <Route path="/join/:shareId" element={<JoinGroup />} />
         <Route path="/group/:shareId/add-expense" element={<AddExpense />} />
+        <Route path="/group/:shareId/settlement" element={<SettlementCalculator />} />
+        <Route path="/groups" element={<Groups />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Routes>
+      <BottomNavigation />
     </Router>
   );
 };
