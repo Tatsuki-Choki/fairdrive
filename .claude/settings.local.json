@@ -16,7 +16,9 @@
       "Bash(vercel:*)",
       "Bash(curl:*)",
       "Bash(touch:*)",
-      "Bash(npx:*)"
+      "Bash(npx:*)",
+      "Bash(pkill:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

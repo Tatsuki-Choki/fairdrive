@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Plus, X, ChevronRight, Users } from "lucide-react";
+import { Plus, X, ChevronRight, Users, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { fetchGasPriceMock } from "../services/gasPrice";
-import GroupSharePopup from "./GroupSharePopup";
-import { generateGroupId } from "../utils/generateGroupId";
+import { supabase } from "../lib/supabase";
 
 interface FrontPageNewProps {
   onGroupCreate?: () => void;
@@ -20,8 +19,8 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
   const [gasPrice, setGasPrice] = useState("");
   const [isLoadingPrice, setIsLoadingPrice] = useState(false);
   const [groupNameConfirmed, setGroupNameConfirmed] = useState(false);
-  const [showSharePopup, setShowSharePopup] = useState(false);
-  const [createdGroupId, setCreatedGroupId] = useState("");
+  const [isCreatingSupabaseGroup, setIsCreatingSupabaseGroup] = useState(false);
+  const [supabaseError, setSupabaseError] = useState("");
 
   const addMember = () => {
     if (!memberName.trim()) return;
@@ -33,41 +32,54 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
     setMembers(members.filter((_, i) => i !== index));
   };
 
-  const createGroup = () => {
-    console.log({ groupName, members, fuelEfficiency, gasType, gasPrice });
-    
-    // グループIDを生成
-    const groupId = generateGroupId();
-    setCreatedGroupId(groupId);
-    
-    // グループデータをローカルストレージに保存
-    const groupData = {
-      id: groupId,
-      name: groupName,
-      members,
-      fuelEfficiency,
-      gasType,
-      gasPrice,
-      createdAt: new Date().toISOString()
-    };
-    
-    // 既存のグループリストを取得
-    const existingGroups = JSON.parse(localStorage.getItem('fairdriveGroups') || '[]');
-    existingGroups.push(groupData);
-    localStorage.setItem('fairdriveGroups', JSON.stringify(existingGroups));
-    
-    // 現在のグループIDを保存
-    localStorage.setItem('currentGroupId', groupId);
-    
-    // 共有ポップアップを表示
-    setShowSharePopup(true);
-  };
-  
-  const handleCloseSharePopup = () => {
-    setShowSharePopup(false);
-    // グループ作成後の処理を呼び出す
-    if (onGroupCreate) {
-      onGroupCreate();
+
+  // Supabaseにグループを作成
+  const createSupabaseGroup = async () => {
+    // 入力チェック
+    if (!groupName.trim()) {
+      setSupabaseError("グループ名を入力してください");
+      return;
+    }
+    if (members.length === 0) {
+      setSupabaseError("メンバーを追加してください");
+      return;
+    }
+
+    setIsCreatingSupabaseGroup(true);
+    setSupabaseError("");
+
+    try {
+      // 1. グループを作成
+      const { data: group, error: groupError } = await supabase
+        .from('groups')
+        .insert({
+          name: groupName,
+          fuel_efficiency: fuelEfficiency ? parseFloat(fuelEfficiency) : null
+        })
+        .select()
+        .single();
+
+      if (groupError) throw groupError;
+
+      // 2. メンバーを追加
+      const memberInserts = members.map(memberName => ({
+        group_id: group.id,
+        name: memberName
+      }));
+
+      const { error: membersError } = await supabase
+        .from('members')
+        .insert(memberInserts);
+
+      if (membersError) throw membersError;
+
+      // 3. グループ詳細画面へ遷移
+      navigate(`/group/${group.share_id}`);
+    } catch (error: any) {
+      console.error('Error creating Supabase group:', error);
+      setSupabaseError("グループの作成に失敗しました: " + error.message);
+    } finally {
+      setIsCreatingSupabaseGroup(false);
     }
   };
 
@@ -330,28 +342,33 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
             </div>
           </motion.div>
 
-          {/* Create Button - Original */}
-          <motion.button
-            variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={createGroup}
-            className="w-full rounded-xl bg-light-primary/10 border border-dark-border text-light-primary px-4 py-3 font-bold text-base transition-all hover:bg-light-primary/20 shadow-glass active:scale-95"
-          >
-            グループを作成（従来版）
-          </motion.button>
 
           {/* Create Button - Supabase */}
           <motion.button
             variants={itemVariants}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
-            onClick={() => navigate('/create-group')}
-            className="w-full rounded-xl bg-light-primary text-dark-base px-4 py-3 font-bold text-base transition-all hover:bg-white shadow-glass active:scale-95 flex items-center justify-center gap-2"
+            onClick={createSupabaseGroup}
+            disabled={isCreatingSupabaseGroup}
+            className="w-full rounded-xl bg-light-primary text-dark-base px-4 py-3 font-bold text-base transition-all hover:bg-white shadow-glass active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Users size={20} />
-            共有グループを作成
+            {isCreatingSupabaseGroup ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : (
+              <Users size={20} />
+            )}
+            {isCreatingSupabaseGroup ? "作成中..." : "共有グループを作成"}
           </motion.button>
+
+          {/* Error Message */}
+          {supabaseError && (
+            <motion.div
+              variants={itemVariants}
+              className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-400"
+            >
+              {supabaseError}
+            </motion.div>
+          )}
 
           {/* Footer Text */}
           <motion.p 
@@ -361,16 +378,10 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
             ETC履歴連携・AI自動精算<br />
             目的地到着時にQRコード決済
           </motion.p>
+
         </motion.div>
       </main>
 
-      {/* グループ共有ポップアップ */}
-      <GroupSharePopup
-        isOpen={showSharePopup}
-        onClose={handleCloseSharePopup}
-        groupName={groupName}
-        groupId={createdGroupId}
-      />
     </div>
   );
 }

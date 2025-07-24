@@ -7,7 +7,6 @@ import Groups from './components/Groups';
 import SettingsPage from './components/SettingsPage';
 import Settlement from './components/Settlement';
 import History from './components/History';
-import CreateGroup from './components/CreateGroup';
 import GroupDetail from './components/GroupDetail';
 import JoinGroup from './components/JoinGroup';
 import AddExpense from './components/AddExpense';
@@ -20,25 +19,6 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const { groupId } = useParams<{ groupId: string }>();
 
-  // グループIDがURLにある場合、そのグループに参加
-  useEffect(() => {
-    if (groupId) {
-      // LocalStorageからグループを取得
-      const groups = JSON.parse(localStorage.getItem('fairdriveGroups') || '[]');
-      const group = groups.find((g: any) => g.id === groupId);
-      
-      if (group) {
-        // グループが存在する場合、currentGroupIdを設定してダッシュボードへ
-        localStorage.setItem('currentGroupId', groupId);
-        setIsGroupCreated(true);
-        setCurrentPage('dashboard');
-        navigate('/');
-      } else {
-        // グループが存在しない場合は、フロントページへ
-        navigate('/');
-      }
-    }
-  }, [groupId, navigate]);
 
   // フロントページからダッシュボードへの遷移を処理
   const handleGroupCreate = () => {
@@ -120,8 +100,6 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<AppContent />} />
-        <Route path="/group/:groupId" element={<AppContent />} />
-        <Route path="/create-group" element={<CreateGroup />} />
         <Route path="/group/:shareId" element={<GroupDetail />} />
         <Route path="/join/:shareId" element={<JoinGroup />} />
         <Route path="/group/:shareId/add-expense" element={<AddExpense />} />
