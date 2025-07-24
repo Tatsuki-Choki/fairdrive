@@ -6,10 +6,10 @@
         "-y",
         "@supabase/mcp-server-supabase@latest",
         "--read-only",
-        "--project-ref=${SUPABASE_PROJECT_REF}"
+        "--project-ref=gfwbwftsvxtqnveyfedw"
       ],
       "env": {
-        "SUPABASE_PROJECT_REF": "your-project-ref-here",
+        "SUPABASE_PROJECT_REF": "gfwbwftsvxtqnveyfedw",
         "SUPABASE_ACCESS_TOKEN": "your-access-token-here"
       }
     }
