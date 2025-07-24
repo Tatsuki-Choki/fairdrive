@@ -18,7 +18,8 @@
       "Bash(touch:*)",
       "Bash(npx:*)",
       "Bash(pkill:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(true)"
     ],
     "deny": []
   }

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { fetchGasPriceMock } from "../services/gasPrice";
 import { supabase } from "../lib/supabase";
+import GroupSharePopup from "./GroupSharePopup";
 
 interface FrontPageNewProps {
   onGroupCreate?: () => void;
@@ -21,6 +22,8 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
   const [groupNameConfirmed, setGroupNameConfirmed] = useState(false);
   const [isCreatingSupabaseGroup, setIsCreatingSupabaseGroup] = useState(false);
   const [supabaseError, setSupabaseError] = useState("");
+  const [showSharePopup, setShowSharePopup] = useState(false);
+  const [createdGroup, setCreatedGroup] = useState<{ shareId: string; shareUrl: string } | null>(null);
 
   const addMember = () => {
     if (!memberName.trim()) return;
@@ -73,13 +76,23 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
 
       if (membersError) throw membersError;
 
-      // 3. グループ詳細画面へ遷移
-      navigate(`/group/${group.share_id}`);
+      // 3. 共有ポップアップを表示
+      const shareUrl = `${window.location.origin}/join/${group.share_id}`;
+      setCreatedGroup({ shareId: group.share_id, shareUrl });
+      setShowSharePopup(true);
     } catch (error: any) {
       console.error('Error creating Supabase group:', error);
       setSupabaseError("グループの作成に失敗しました: " + error.message);
     } finally {
       setIsCreatingSupabaseGroup(false);
+    }
+  };
+
+  const handleCloseSharePopup = () => {
+    setShowSharePopup(false);
+    // ダッシュボードへ遷移
+    if (onGroupCreate) {
+      onGroupCreate();
     }
   };
 
@@ -382,6 +395,16 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
         </motion.div>
       </main>
 
+      {/* グループ共有ポップアップ */}
+      {createdGroup && (
+        <GroupSharePopup
+          isOpen={showSharePopup}
+          onClose={handleCloseSharePopup}
+          groupName={groupName}
+          shareId={createdGroup.shareId}
+          shareUrl={createdGroup.shareUrl}
+        />
+      )}
     </div>
   );
 }
