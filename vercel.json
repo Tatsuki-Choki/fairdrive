@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd fairdrive-frontend && npm install && npm run build",
+  "outputDirectory": "fairdrive-frontend/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
