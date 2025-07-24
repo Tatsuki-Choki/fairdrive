@@ -26,6 +26,12 @@ const CreateGroup: React.FC = () => {
     setError('')
 
     try {
+      // Supabaseが正しく設定されているか確認
+      if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL === 'https://your-project.supabase.co') {
+        setError('Supabaseが設定されていません。開発者にお問い合わせください。')
+        return
+      }
+
       // グループを作成
       const { data: group, error: groupError } = await supabase
         .from('groups')
@@ -36,7 +42,10 @@ const CreateGroup: React.FC = () => {
         .select()
         .single()
 
-      if (groupError) throw groupError
+      if (groupError) {
+        console.error('Group creation error:', groupError)
+        throw groupError
+      }
 
       // 作成者をメンバーとして追加
       const { error: memberError } = await supabase
