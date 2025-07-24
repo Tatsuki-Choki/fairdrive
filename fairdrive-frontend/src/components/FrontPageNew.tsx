@@ -139,7 +139,7 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
             className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 shadow-glass border border-dark-border"
           >
             <div className="flex items-center gap-3">
-              <label className="text-sm font-semibold text-light-primary/80 whitespace-nowrap flex items-center gap-2 w-24">
+              <label className="text-sm font-semibold text-light-primary/80 whitespace-nowrap flex items-center gap-2 flex-shrink-0" style={{ width: "96px" }}>
                 グループ名
                 {groupNameConfirmed && (
                   <motion.span
@@ -166,7 +166,7 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
                     e.currentTarget.blur();
                   }
                 }}
-                className={`flex-1 rounded-xl bg-white/5 border px-3 py-2.5 text-light-primary placeholder-light-primary/40 focus:outline-none focus:ring-2 focus:ring-light-primary/30 transition-all ${
+                className={`flex-1 min-w-0 rounded-xl bg-white/5 border px-3 py-2.5 text-light-primary placeholder-light-primary/40 focus:outline-none focus:ring-2 focus:ring-light-primary/30 transition-all ${
                   groupNameConfirmed ? 'border-light-primary/50' : 'border-dark-border'
                 }`}
               />
@@ -181,8 +181,8 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
             className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 shadow-glass border border-dark-border"
           >
             <div className="flex items-center gap-3">
-              <label className="text-sm font-semibold text-light-primary/80 whitespace-nowrap w-24">メンバー</label>
-              <div className="flex gap-2 flex-1">
+              <label className="text-sm font-semibold text-light-primary/80 whitespace-nowrap flex-shrink-0" style={{ width: "96px" }}>メンバー</label>
+              <div className="flex gap-2 flex-1 min-w-0">
                 <input
                   type="text"
                   placeholder="タツキ"
@@ -194,13 +194,13 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
                       addMember();
                     }
                   }}
-                  className="flex-1 rounded-xl bg-white/5 border border-dark-border px-3 py-2.5 text-light-primary placeholder-light-primary/40 focus:outline-none focus:ring-2 focus:ring-light-primary/30 transition-all"
+                  className="flex-1 min-w-0 rounded-xl bg-white/5 border border-dark-border px-3 py-2.5 text-light-primary placeholder-light-primary/40 focus:outline-none focus:ring-2 focus:ring-light-primary/30 transition-all"
                 />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={addMember}
-                  className="rounded-xl bg-light-primary text-dark-base px-3 py-2.5 font-semibold transition-all hover:bg-white active:scale-95"
+                  className="rounded-xl bg-light-primary text-dark-base px-3 py-2.5 font-semibold transition-all hover:bg-white active:scale-95 flex-shrink-0"
                 >
                   <Plus size={16} />
                 </motion.button>
@@ -245,13 +245,13 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
             className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 shadow-glass border border-dark-border"
           >
             <div className="flex items-center gap-3">
-              <label className="text-sm font-semibold text-light-primary/80 whitespace-nowrap w-24">燃費 (km/L)</label>
+              <label className="text-sm font-semibold text-light-primary/80 whitespace-nowrap flex-shrink-0" style={{ width: "96px" }}>燃費 (km/L)</label>
               <input
                 type="number"
                 placeholder="15.5"
                 value={fuelEfficiency}
                 onChange={(e) => setFuelEfficiency(e.target.value)}
-                className="flex-1 rounded-xl bg-white/5 border border-dark-border px-3 py-2.5 text-light-primary placeholder-light-primary/40 focus:outline-none focus:ring-2 focus:ring-light-primary/30 transition-all"
+                className="flex-1 min-w-0 rounded-xl bg-white/5 border border-dark-border px-3 py-2.5 text-light-primary placeholder-light-primary/40 focus:outline-none focus:ring-2 focus:ring-light-primary/30 transition-all"
               />
             </div>
           </motion.div>
