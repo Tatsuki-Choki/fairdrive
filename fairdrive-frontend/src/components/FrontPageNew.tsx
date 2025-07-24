@@ -262,10 +262,10 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
             className="mt-2"
           >
             <div className="flex gap-2">
-              <div className="flex flex-col gap-1" style={{ width: "100px" }}>
+              <div className="flex flex-col gap-1 flex-shrink-0" style={{ width: "100px" }}>
                 <button
                   onClick={() => setGasType("regular")}
-                  className={`rounded-xl px-2 py-2 text-xs font-medium transition-all flex items-center justify-center relative ${
+                  className={`rounded-xl px-2 py-2 text-xs font-medium transition-all flex items-center justify-center relative whitespace-nowrap ${
                     gasType === "regular"
                       ? "bg-light-primary text-dark-base"
                       : "bg-transparent border border-dark-border text-light-primary/60 hover:text-light-primary"
@@ -284,7 +284,7 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
                 </button>
                 <button
                   onClick={() => setGasType("highOctane")}
-                  className={`rounded-xl px-2 py-2 text-xs font-medium transition-all flex items-center justify-center relative ${
+                  className={`rounded-xl px-2 py-2 text-xs font-medium transition-all flex items-center justify-center relative whitespace-nowrap ${
                     gasType === "highOctane"
                       ? "bg-light-primary text-dark-base"
                       : "bg-transparent border border-dark-border text-light-primary/60 hover:text-light-primary"
@@ -307,14 +307,14 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
                 placeholder="168.5"
                 value={gasPrice}
                 onChange={(e) => setGasPrice(e.target.value)}
-                className="flex-1 rounded-xl bg-white/5 border border-dark-border px-3 py-2.5 text-light-primary placeholder-light-primary/40 focus:outline-none focus:ring-2 focus:ring-light-primary/30 transition-all"
+                className="flex-1 min-w-0 rounded-xl bg-white/5 border border-dark-border px-3 py-2.5 text-light-primary placeholder-light-primary/40 focus:outline-none focus:ring-2 focus:ring-light-primary/30 transition-all"
               />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={fetchGasPrice}
                 disabled={isLoadingPrice}
-                className="rounded-xl bg-light-primary/10 border border-dark-border px-3 py-2.5 text-light-primary text-xs font-medium transition-all hover:bg-light-primary/20 disabled:opacity-50 flex flex-col items-center justify-center leading-tight"
+                className="rounded-xl bg-light-primary/10 border border-dark-border px-3 py-2.5 text-light-primary text-xs font-medium transition-all hover:bg-light-primary/20 disabled:opacity-50 flex flex-col items-center justify-center leading-tight flex-shrink-0 whitespace-nowrap"
               >
                 {isLoadingPrice ? (
                   "取得中..."
