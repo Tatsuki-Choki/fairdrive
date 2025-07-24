@@ -2,6 +2,8 @@
 
 車での旅行・ドライブにおける費用を自動的に記録し、公平に割り勘計算を行うWebアプリケーション
 
+🚗 [Live Demo](https://github.com/Tatsuki-Choki/fairdrive)
+
 ## プロジェクト構成
 
 ```
