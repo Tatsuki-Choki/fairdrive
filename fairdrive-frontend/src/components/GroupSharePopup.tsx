@@ -11,7 +11,7 @@ interface GroupSharePopupProps {
 
 export default function GroupSharePopup({ isOpen, onClose, groupName, groupId }: GroupSharePopupProps) {
   const [copied, setCopied] = useState(false);
-  const shareUrl = `https://fairdrive.app/group/${groupId}`;
+  const shareUrl = `${window.location.origin}/group/${groupId}`;
 
   // コピー成功後、3秒後に状態をリセット
   useEffect(() => {
