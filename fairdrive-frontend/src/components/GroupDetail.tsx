@@ -10,7 +10,12 @@ import {
   Plus,
   Fuel,
   Calendar,
-  DollarSign
+  DollarSign,
+  Car,
+  Receipt,
+  CreditCard,
+  ChevronRight,
+  Clock
 } from 'lucide-react'
 import { MonochromeHeader } from './organisms/MonochromeHeader'
 import { MonochromeButton } from './atoms/MonochromeButton'
@@ -152,6 +157,25 @@ const GroupDetail: React.FC = () => {
     return expenses.reduce((sum, expense) => sum + expense.amount, 0)
   }
 
+  const calculatePerPerson = () => {
+    if (members.length === 0) return 0
+    return Math.floor(calculateTotalExpenses() / members.length)
+  }
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "高速料金": return <Car size={16} />
+      case "ガソリン": return <Fuel size={16} />
+      case "駐車場": return <Car size={16} />
+      default: return <Receipt size={16} />
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`
+  }
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -194,110 +218,131 @@ const GroupDetail: React.FC = () => {
       />
 
       <motion.div
-        className="px-3 pt-20 max-w-md mx-auto space-y-3"
+        className="px-3 pt-20 pb-6 max-w-md mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* 共有セクション */}
-        <motion.div variants={itemVariants}>
-          <MonochromeCard className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Share2 size={16} />
-                <span className="text-sm font-semibold">共有リンク</span>
-              </div>
-              <span className="text-xs text-light-primary/50">
-                {members.length}人が参加中
-              </span>
+        {/* グループ概要カード */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-glass rounded-3xl p-6 shadow-glass border border-dark-border mb-6"
+        >
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-2xl font-bold text-light-primary mb-1">{group.name}</h2>
+              <p className="text-sm text-light-primary/60">{members.length}人のメンバー</p>
             </div>
-            <div className="flex gap-2">
-              <div className="flex-1 bg-white/5 rounded-xl px-3 py-2.5 text-xs truncate">
-                {window.location.origin}/join/{shareId}
-              </div>
-              <MonochromeButton
-                onClick={handleCopyShareUrl}
-                className="px-3 py-2.5 flex items-center gap-1.5"
-                variant="secondary"
-              >
-                {copied ? (
-                  <>
-                    <Check size={14} />
-                    <span className="text-xs">コピー済</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={14} />
-                    <span className="text-xs">コピー</span>
-                  </>
-                )}
-              </MonochromeButton>
-            </div>
-          </MonochromeCard>
-        </motion.div>
-
-        {/* グループ情報 */}
-        <motion.div variants={itemVariants}>
-          <MonochromeCard className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Fuel size={14} className="text-light-primary/70" />
-                <span className="text-xs text-light-primary/70">燃費</span>
-              </div>
-              <span className="text-sm font-semibold">
-                {group.fuel_efficiency || '未設定'} km/L
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar size={14} className="text-light-primary/70" />
-                <span className="text-xs text-light-primary/70">作成日</span>
-              </div>
-              <span className="text-sm">
-                {new Date(group.created_at).toLocaleDateString('ja-JP')}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <DollarSign size={14} className="text-light-primary/70" />
-                <span className="text-xs text-light-primary/70">合計支出</span>
-              </div>
-              <span className="text-sm font-bold">
-                ¥{calculateTotalExpenses().toLocaleString()}
-              </span>
-            </div>
-          </MonochromeCard>
-        </motion.div>
-
-        {/* メンバーリスト */}
-        <motion.div variants={itemVariants}>
-          <div className="flex items-center gap-2 mb-2">
-            <Users size={16} />
-            <h3 className="text-sm font-semibold">メンバー</h3>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleCopyShareUrl}
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              {copied ? <Check size={20} /> : <Share2 size={20} />}
+            </motion.button>
           </div>
-          <div className="space-y-1">
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-dark-base/50 rounded-2xl p-4">
+              <p className="text-xs text-light-primary/60 mb-1">合計金額</p>
+              <p className="text-2xl font-bold text-light-primary">
+                ¥{calculateTotalExpenses().toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-dark-base/50 rounded-2xl p-4">
+              <p className="text-xs text-light-primary/60 mb-1">1人あたり</p>
+              <p className="text-2xl font-bold text-light-primary">
+                ¥{calculatePerPerson().toLocaleString()}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* クイックアクション */}
+        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 mb-6">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate(`/group/${shareId}/add-expense`)}
+            className="bg-light-primary text-dark-base rounded-2xl p-4 flex flex-col items-center gap-2 font-semibold shadow-glass"
+          >
+            <Plus size={24} />
+            <span className="text-sm">支払いを追加</span>
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 flex flex-col items-center gap-2 font-semibold shadow-glass border border-dark-border"
+          >
+            <CreditCard size={24} />
+            <span className="text-sm">精算する</span>
+          </motion.button>
+        </motion.div>
+
+        {/* 最近の支払い */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              <Clock size={16} />
+              最近の支払い
+            </h3>
+            <button className="text-xs text-light-primary/60 hover:text-light-primary transition-colors">
+              すべて見る
+            </button>
+          </div>
+          
+          {expenses.length === 0 ? (
+            <MonochromeCard className="p-6 text-center">
+              <p className="text-sm text-light-primary/60">まだ支払いが記録されていません</p>
+            </MonochromeCard>
+          ) : (
+            <div className="space-y-2">
+              {expenses.slice(0, 3).map((expense) => {
+                const payer = members.find(m => m.id === expense.payer_member_id)
+                return (
+                  <motion.div
+                    key={expense.id}
+                    whileHover={{ scale: 1.01 }}
+                    className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 shadow-glass border border-dark-border"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                          {getCategoryIcon(expense.category)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{expense.description || expense.category}</p>
+                          <p className="text-xs text-light-primary/60">{payer?.name || '不明'}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">¥{expense.amount.toLocaleString()}</p>
+                        <p className="text-xs text-light-primary/60">{formatDate(expense.paid_at)}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+        </motion.div>
+
+        {/* メンバー一覧 */}
+        <motion.div variants={itemVariants}>
+          <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
+            <Users size={16} />
+            メンバー
+          </h3>
+          <div className="grid grid-cols-2 gap-2">
             {members.map((member) => (
-              <MonochromeCard key={member.id} className="p-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">{member.name}</span>
-                  <span className="text-xs text-light-primary/50">
-                    {new Date(member.joined_at).toLocaleDateString('ja-JP')}
-                  </span>
-                </div>
+              <MonochromeCard key={member.id} className="p-3 flex items-center justify-between">
+                <span className="text-sm font-medium">{member.name}</span>
+                <ChevronRight size={16} className="text-light-primary/40" />
               </MonochromeCard>
             ))}
           </div>
-        </motion.div>
-
-        {/* 支払い追加ボタン */}
-        <motion.div variants={itemVariants} className="pt-3">
-          <MonochromeButton
-            onClick={() => navigate(`/group/${shareId}/add-expense`)}
-            className="w-full py-4 flex items-center justify-center gap-2"
-          >
-            <Plus size={20} />
-            支払いを追加
-          </MonochromeButton>
         </motion.div>
       </motion.div>
     </div>

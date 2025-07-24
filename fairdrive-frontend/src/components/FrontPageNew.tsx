@@ -90,9 +90,9 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
 
   const handleCloseSharePopup = () => {
     setShowSharePopup(false);
-    // ダッシュボードへ遷移
-    if (onGroupCreate) {
-      onGroupCreate();
+    // グループ詳細画面（ダッシュボード）へ遷移
+    if (createdGroup) {
+      navigate(`/group/${createdGroup.shareId}`);
     }
   };
 
