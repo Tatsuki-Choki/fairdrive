@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchGasPriceMock } from "../services/gasPrice";
 import { supabase } from "../lib/supabase";
 import GroupSharePopup from "./GroupSharePopup";
+import { useGroupStore } from "../store/groupStore";
 
 interface FrontPageNewProps {
   onGroupCreate?: () => void;
@@ -12,6 +13,7 @@ interface FrontPageNewProps {
 
 export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
   const navigate = useNavigate();
+  const { addGroup } = useGroupStore();
   const [groupName, setGroupName] = useState("");
   const [memberName, setMemberName] = useState("");
   const [members, setMembers] = useState<string[]>([]);
@@ -76,7 +78,15 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
 
       if (membersError) throw membersError;
 
-      // 3. 共有ポップアップを表示
+      // 3. グローバルストアに追加
+      addGroup({
+        id: group.share_id,
+        name: groupName,
+        members: members,
+        createdAt: new Date()
+      });
+      
+      // 4. 共有ポップアップを表示
       const shareUrl = `${window.location.origin}/join/${group.share_id}`;
       setCreatedGroup({ shareId: group.share_id, shareUrl });
       setShowSharePopup(true);
@@ -90,10 +100,8 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
 
   const handleCloseSharePopup = () => {
     setShowSharePopup(false);
-    // グループ詳細画面（ダッシュボード）へ遷移
-    if (createdGroup) {
-      navigate(`/group/${createdGroup.shareId}`);
-    }
+    // ダッシュボードへ遷移
+    navigate('/dashboard');
   };
 
   const fetchGasPrice = async () => {

@@ -13,6 +13,7 @@ import AddExpense from './components/AddExpense';
 import SettlementCalculator from './components/SettlementCalculator';
 import { Home, LayoutDashboard, Users, Settings } from "lucide-react";
 import { motion } from "framer-motion";
+import { useGroupStore } from './store/groupStore';
 
 const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'front' | 'dashboard' | 'groups' | 'settings' | 'payment' | 'settlement' | 'history'>('front');
@@ -100,10 +101,12 @@ const AppContent: React.FC = () => {
 const BottomNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { groups } = useGroupStore();
   
   // 現在のページを判定
   const getCurrentPage = () => {
     if (location.pathname === '/') return 'front';
+    if (location.pathname === '/dashboard') return 'dashboard';
     if (location.pathname.includes('/group/') && !location.pathname.includes('/add-expense')) return 'dashboard';
     if (location.pathname === '/groups') return 'groups';
     if (location.pathname === '/settings') return 'settings';
@@ -112,7 +115,11 @@ const BottomNavigation: React.FC = () => {
   
   const currentPage = getCurrentPage();
   
-  // ボトムナビゲーションは常に表示
+  // 特定のページではボトムナビゲーションを非表示
+  const hideOnPages = ['/group/create', '/join/'];
+  if (hideOnPages.some(page => location.pathname.includes(page))) {
+    return null;
+  }
   
   return (
     <motion.nav 
@@ -124,7 +131,7 @@ const BottomNavigation: React.FC = () => {
       <ul className="flex justify-around py-3">
         {[
           { icon: Home, label: "ホーム", path: '/' },
-          { icon: LayoutDashboard, label: "ダッシュボード", path: location.pathname.includes('/group/') ? location.pathname : '/dashboard' },
+          { icon: LayoutDashboard, label: "ダッシュボード", path: '/dashboard' },
           { icon: Users, label: "グループ", path: '/groups' },
           { icon: Settings, label: "設定", path: '/settings' }
         ].map((item, idx) => {
@@ -163,6 +170,8 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<AppContent />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/group/create" element={<FrontPageNew />} />
         <Route path="/group/:shareId" element={<GroupDetail />} />
         <Route path="/join/:shareId" element={<JoinGroup />} />
         <Route path="/group/:shareId/add-expense" element={<AddExpense />} />

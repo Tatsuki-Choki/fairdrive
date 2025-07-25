@@ -19,7 +19,8 @@
       "Bash(npx:*)",
       "Bash(pkill:*)",
       "Bash(node:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": []
   }

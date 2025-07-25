@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Plus, Users, ChevronRight, Calendar, Car } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useGroupStore } from "../store/groupStore";
 
 interface Group {
   id: string;
@@ -12,33 +14,20 @@ interface Group {
 }
 
 export default function Groups() {
-  // 仮のグループデータ
-  const [groups] = useState<Group[]>([
-    {
-      id: "1",
-      name: "大阪グルメ旅行",
-      members: ["タツキ", "ユウキ", "サトシ", "アイコ"],
-      lastActivity: "2024年1月20日",
-      totalExpense: 45280,
-      isActive: true
-    },
-    {
-      id: "2",
-      name: "箱根温泉旅行",
-      members: ["タツキ", "ユウキ", "ケンジ"],
-      lastActivity: "2023年12月15日",
-      totalExpense: 38500,
-      isActive: false
-    },
-    {
-      id: "3",
-      name: "京都観光",
-      members: ["タツキ", "アイコ"],
-      lastActivity: "2023年11月3日",
-      totalExpense: 12800,
-      isActive: false
-    }
-  ]);
+  const navigate = useNavigate();
+  const { groups, setCurrentGroup } = useGroupStore();
+  
+  // グループに仮の追加情報を付与
+  const groupsWithDetails = groups.map((group, index) => ({
+    ...group,
+    lastActivity: new Date(group.createdAt).toLocaleDateString('ja-JP', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }),
+    totalExpense: 0, // デモ用の値
+    isActive: index === 0 // 最新のグループをアクティブに
+  }));
 
   // Animation variants
   const containerVariants = {
@@ -76,6 +65,7 @@ export default function Groups() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/group/create')}
           className="text-light-primary/60 hover:text-light-primary transition-colors"
         >
           <Plus size={24} />
@@ -93,12 +83,16 @@ export default function Groups() {
           {/* 現在のグループ */}
           <motion.div variants={itemVariants}>
             <h2 className="text-sm font-semibold text-light-primary/60 mb-2">現在のグループ</h2>
-            {groups.filter(g => g.isActive).map((group) => (
+            {groupsWithDetails.filter(g => g.isActive).map((group) => (
               <motion.div
                 key={group.id}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 shadow-glass border border-dark-border mb-3"
+                onClick={() => {
+                  setCurrentGroup(group.id);
+                  navigate('/dashboard');
+                }}
+                className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 shadow-glass border border-dark-border mb-3 cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -142,41 +136,48 @@ export default function Groups() {
           </motion.div>
 
           {/* 過去のグループ */}
-          <motion.div variants={itemVariants}>
-            <h2 className="text-sm font-semibold text-light-primary/60 mb-2">過去のグループ</h2>
-            {groups.filter(g => !g.isActive).map((group) => (
-              <motion.div
-                key={group.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="bg-white/[0.02] backdrop-blur-glass rounded-2xl p-4 shadow-glass border border-dark-border mb-3 opacity-60"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-base font-medium mb-1">{group.name}</h3>
-                    <div className="flex items-center gap-4 text-xs text-light-primary/60">
-                      <span className="flex items-center gap-1">
-                        <Users size={14} />
-                        {group.members.length}人
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar size={14} />
-                        {group.lastActivity}
-                      </span>
+          {groupsWithDetails.filter(g => !g.isActive).length > 0 && (
+            <motion.div variants={itemVariants}>
+              <h2 className="text-sm font-semibold text-light-primary/60 mb-2">過去のグループ</h2>
+              {groupsWithDetails.filter(g => !g.isActive).map((group) => (
+                <motion.div
+                  key={group.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setCurrentGroup(group.id);
+                    navigate('/dashboard');
+                  }}
+                  className="bg-white/[0.02] backdrop-blur-glass rounded-2xl p-4 shadow-glass border border-dark-border mb-3 opacity-60 cursor-pointer"
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-base font-medium mb-1">{group.name}</h3>
+                      <div className="flex items-center gap-4 text-xs text-light-primary/60">
+                        <span className="flex items-center gap-1">
+                          <Users size={14} />
+                          {group.members.length}人
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          {group.lastActivity}
+                        </span>
+                      </div>
                     </div>
+                    <ChevronRight size={20} className="text-light-primary/20" />
                   </div>
-                  <ChevronRight size={20} className="text-light-primary/20" />
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
 
           {/* 新しいグループを作成 */}
           <motion.button
             variants={itemVariants}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
-            className="w-full rounded-xl bg-light-primary/10 border border-dashed border-light-primary/30 p-4 flex items-center justify-center gap-2 text-light-primary/60 hover:text-light-primary transition-colors"
+            onClick={() => navigate('/group/create')}
+            className="w-full rounded-xl bg-light-primary/10 border border-dashed border-light-primary/30 p-4 flex items-center justify-center gap-2 text-light-primary/60 hover:text-light-primary transition-colors cursor-pointer"
           >
             <Plus size={20} />
             <span>新しいグループを作成</span>
