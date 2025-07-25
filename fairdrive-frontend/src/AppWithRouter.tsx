@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useParams, useNavigate, useLoca
 import FrontPageNew from './components/FrontPageNew';
 import Dashboard from './components/Dashboard';
 import PaymentRecord from './components/PaymentRecord';
-import Groups from './components/Groups';
 import SettingsPage from './components/SettingsPage';
 import Settlement from './components/Settlement';
 import History from './components/History';
@@ -11,7 +10,7 @@ import GroupDetail from './components/GroupDetail';
 import JoinGroup from './components/JoinGroup';
 import AddExpense from './components/AddExpense';
 import SettlementCalculator from './components/SettlementCalculator';
-import { Home, LayoutDashboard, Users, Settings } from "lucide-react";
+import { Home, LayoutDashboard, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { useGroupStore } from './store/groupStore';
 
@@ -107,8 +106,7 @@ const BottomNavigation: React.FC = () => {
   const getCurrentPage = () => {
     if (location.pathname === '/') return 'front';
     if (location.pathname === '/dashboard') return 'dashboard';
-    if (location.pathname.includes('/group/') && !location.pathname.includes('/add-expense')) return 'dashboard';
-    if (location.pathname === '/groups') return 'groups';
+    if (location.pathname.includes('/group/') && !location.pathname.includes('/add-expense') && !location.pathname.includes('/create')) return 'dashboard';
     if (location.pathname === '/settings') return 'settings';
     return '';
   };
@@ -116,7 +114,7 @@ const BottomNavigation: React.FC = () => {
   const currentPage = getCurrentPage();
   
   // 特定のページではボトムナビゲーションを非表示
-  const hideOnPages = ['/group/create', '/join/'];
+  const hideOnPages = ['/join/'];
   if (hideOnPages.some(page => location.pathname.includes(page))) {
     return null;
   }
@@ -132,7 +130,6 @@ const BottomNavigation: React.FC = () => {
         {[
           { icon: Home, label: "ホーム", path: '/' },
           { icon: LayoutDashboard, label: "ダッシュボード", path: '/dashboard' },
-          { icon: Users, label: "グループ", path: '/groups' },
           { icon: Settings, label: "設定", path: '/settings' }
         ].map((item, idx) => {
           const isActive = 
@@ -176,7 +173,6 @@ const App: React.FC = () => {
         <Route path="/join/:shareId" element={<JoinGroup />} />
         <Route path="/group/:shareId/add-expense" element={<AddExpense />} />
         <Route path="/group/:shareId/settlement" element={<SettlementCalculator />} />
-        <Route path="/groups" element={<Groups />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
       <BottomNavigation />

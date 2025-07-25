@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Car, Fuel, CreditCard, Receipt, Users, ChevronRight, UserPlus, Loader2 } from "lucide-react";
+import { Plus, Car, Fuel, CreditCard, Receipt, Users, ChevronRight, UserPlus, Loader2, PlusCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useGroupStore } from "../store/groupStore";
@@ -238,9 +238,10 @@ export default function Dashboard({ onAddPayment, onSettle, onViewHistory }: Das
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/group/create')}
           className="text-light-primary/60 hover:text-light-primary transition-colors"
         >
-          <Users size={20} />
+          <PlusCircle size={20} />
         </motion.button>
       </motion.header>
 

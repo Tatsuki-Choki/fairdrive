@@ -6,6 +6,7 @@ import { fetchGasPriceMock } from "../services/gasPrice";
 import { supabase } from "../lib/supabase";
 import GroupSharePopup from "./GroupSharePopup";
 import { useGroupStore } from "../store/groupStore";
+import packageJson from "../../package.json";
 
 interface FrontPageNewProps {
   onGroupCreate?: () => void;
@@ -394,6 +395,11 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
 
         </motion.div>
       </main>
+
+      {/* バージョン情報 */}
+      <div className="absolute bottom-2 left-0 right-0 text-center">
+        <p className="text-[10px] text-light-primary/30">Version {packageJson.version}</p>
+      </div>
 
       {/* グループ共有ポップアップ */}
       {createdGroup && (
