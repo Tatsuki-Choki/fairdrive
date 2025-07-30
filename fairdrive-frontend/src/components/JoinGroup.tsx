@@ -92,8 +92,9 @@ const JoinGroup: React.FC = () => {
         if (memberError) throw memberError
       }
 
-      // selectedGroupIdをセットしてダッシュボードへ遷移
-      const { setSelectedGroupId } = useGroupStore.getState()
+      // グループリストを再取得してからダッシュボードへ遷移
+      const { fetchGroups, setSelectedGroupId } = useGroupStore.getState()
+      await fetchGroups()
       setSelectedGroupId(group.id)
       navigate('/dashboard')
     } catch (err) {
@@ -105,11 +106,12 @@ const JoinGroup: React.FC = () => {
     }
   }
 
-  const handleJoinAsExisting = () => {
+  const handleJoinAsExisting = async () => {
     setShowDuplicatePopup(false)
     // 既存メンバーとして参加（新規追加しない）
     if (group) {
-      const { setSelectedGroupId } = useGroupStore.getState()
+      const { fetchGroups, setSelectedGroupId } = useGroupStore.getState()
+      await fetchGroups()
       setSelectedGroupId(group.id)
       navigate('/dashboard')
     }

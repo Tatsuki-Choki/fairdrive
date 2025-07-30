@@ -12,9 +12,9 @@ interface FrontPageNewProps {
   onGroupCreate?: () => void;
 }
 
-export default function FrontPageNew({ }: FrontPageNewProps) {
+export default function FrontPageNew() {
   const navigate = useNavigate();
-  const { addGroup, setSelectedGroupId } = useGroupStore();
+  const { fetchGroups, setSelectedGroupId } = useGroupStore();
   const [groupName, setGroupName] = useState("");
   const [memberName, setMemberName] = useState("");
   const [members, setMembers] = useState<string[]>([]);
@@ -79,13 +79,8 @@ export default function FrontPageNew({ }: FrontPageNewProps) {
 
       if (membersError) throw membersError;
 
-      // 3. グローバルストアに追加
-      addGroup({
-        id: group.id,
-        name: groupName,
-        members: members,
-        createdAt: new Date()
-      });
+      // 3. グループリストを再取得
+      await fetchGroups();
       
       // selectedGroupIdをセット
       setSelectedGroupId(group.id);

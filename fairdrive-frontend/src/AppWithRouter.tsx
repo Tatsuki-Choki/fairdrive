@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useParams, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import FrontPageNew from './components/FrontPageNew';
 import Dashboard from './components/Dashboard';
 import PaymentRecord from './components/PaymentRecord';
@@ -10,6 +10,7 @@ import GroupRedirect from './components/GroupRedirect';
 import JoinGroup from './components/JoinGroup';
 import AddExpense from './components/AddExpense';
 import SettlementCalculator from './components/SettlementCalculator';
+import LoadingSpinner from './components/LoadingSpinner';
 import { Home, LayoutDashboard, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { useGroupStore } from './store/groupStore';
@@ -160,6 +161,25 @@ const BottomNavigation: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  const fetchGroups = useGroupStore((state) => state.fetchGroups);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      await fetchGroups();
+      setIsLoading(false);
+    };
+    loadInitialData();
+  }, [fetchGroups]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-dark-base">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <Router>
       <Routes>

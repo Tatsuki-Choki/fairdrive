@@ -1,11 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from '../lib/supabase';
+import { Database } from '../types/supabase';
+
+type MemberFromDB = Database['public']['Tables']['members']['Row'];
 
 interface Group {
   id: string;
   name: string;
-  members: string[];
-  createdAt: Date;
+  share_id: string;
+  members: MemberFromDB[];
+  created_at: string;
 }
 
 interface GroupStore {
@@ -16,6 +21,7 @@ interface GroupStore {
   error: string | null;
   
   // Actions
+  fetchGroups: () => Promise<void>;
   addGroup: (group: Group) => void;
   setCurrentGroup: (groupId: string) => void;
   setSelectedGroupId: (groupId: string) => void;
@@ -29,12 +35,69 @@ interface GroupStore {
 
 export const useGroupStore = create<GroupStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       groups: [],
       currentGroupId: null,
       selectedGroupId: null,
       isLoading: false,
       error: null,
+
+      fetchGroups: async () => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          // グループ一覧を取得
+          const { data: groupsData, error: groupsError } = await supabase
+            .from('groups')
+            .select('*')
+            .order('created_at', { ascending: false });
+          
+          if (groupsError) throw groupsError;
+          
+          if (!groupsData || groupsData.length === 0) {
+            set({ groups: [], isLoading: false });
+            return;
+          }
+          
+          // 各グループのメンバーを取得
+          const groupsWithMembers: Group[] = await Promise.all(
+            groupsData.map(async (group) => {
+              const { data: members, error: membersError } = await supabase
+                .from('members')
+                .select('*')
+                .eq('group_id', group.id)
+                .order('joined_at', { ascending: true });
+              
+              if (membersError) {
+                console.error('Error fetching members:', membersError);
+                return {
+                  ...group,
+                  members: []
+                };
+              }
+              
+              return {
+                ...group,
+                members: members || []
+              };
+            })
+          );
+          
+          set({ groups: groupsWithMembers });
+          
+          // 選択中のグループIDが無効な場合、最初のグループを選択
+          const { selectedGroupId } = get();
+          const isSelectedGroupValid = groupsWithMembers.some(g => g.id === selectedGroupId);
+          if (groupsWithMembers.length > 0 && (!selectedGroupId || !isSelectedGroupValid)) {
+            set({ selectedGroupId: groupsWithMembers[0].id });
+          }
+        } catch (error) {
+          console.error('Error fetching groups:', error);
+          set({ error: 'グループの取得に失敗しました' });
+        } finally {
+          set({ isLoading: false });
+        }
+      },
 
       addGroup: (group) =>
         set((state) => ({
@@ -87,7 +150,10 @@ export const useGroupStore = create<GroupStore>()(
     }),
     {
       name: 'group-storage',
-      partialize: (state) => ({ selectedGroupId: state.selectedGroupId }),
+      partialize: (state) => ({ 
+        groups: state.groups,
+        selectedGroupId: state.selectedGroupId 
+      }),
     }
   )
 );
