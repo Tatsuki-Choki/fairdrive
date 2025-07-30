@@ -12,9 +12,9 @@ interface FrontPageNewProps {
   onGroupCreate?: () => void;
 }
 
-export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
+export default function FrontPageNew({ }: FrontPageNewProps) {
   const navigate = useNavigate();
-  const { addGroup } = useGroupStore();
+  const { addGroup, setSelectedGroupId } = useGroupStore();
   const [groupName, setGroupName] = useState("");
   const [memberName, setMemberName] = useState("");
   const [members, setMembers] = useState<string[]>([]);
@@ -81,11 +81,14 @@ export default function FrontPageNew({ onGroupCreate }: FrontPageNewProps) {
 
       // 3. グローバルストアに追加
       addGroup({
-        id: group.share_id,
+        id: group.id,
         name: groupName,
         members: members,
         createdAt: new Date()
       });
+      
+      // selectedGroupIdをセット
+      setSelectedGroupId(group.id);
       
       // 4. 共有ポップアップを表示
       const shareUrl = `${window.location.origin}/join/${group.share_id}`;

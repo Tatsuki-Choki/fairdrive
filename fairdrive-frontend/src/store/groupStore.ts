@@ -11,12 +11,14 @@ interface Group {
 interface GroupStore {
   groups: Group[];
   currentGroupId: string | null;
+  selectedGroupId: string | null;
   isLoading: boolean;
   error: string | null;
   
   // Actions
   addGroup: (group: Group) => void;
   setCurrentGroup: (groupId: string) => void;
+  setSelectedGroupId: (groupId: string) => void;
   removeGroup: (groupId: string) => void;
   updateGroup: (groupId: string, updates: Partial<Group>) => void;
   setGroups: (groups: Group[]) => void;
@@ -30,6 +32,7 @@ export const useGroupStore = create<GroupStore>()(
     (set) => ({
       groups: [],
       currentGroupId: null,
+      selectedGroupId: null,
       isLoading: false,
       error: null,
 
@@ -42,6 +45,11 @@ export const useGroupStore = create<GroupStore>()(
       setCurrentGroup: (groupId) =>
         set(() => ({
           currentGroupId: groupId,
+        })),
+
+      setSelectedGroupId: (groupId) =>
+        set(() => ({
+          selectedGroupId: groupId,
         })),
 
       removeGroup: (groupId) =>
@@ -79,6 +87,7 @@ export const useGroupStore = create<GroupStore>()(
     }),
     {
       name: 'group-storage',
+      partialize: (state) => ({ selectedGroupId: state.selectedGroupId }),
     }
   )
 );

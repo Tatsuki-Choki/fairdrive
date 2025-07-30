@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useParams, useLocation, useNavigate } from 'react-router-dom';
 import FrontPageNew from './components/FrontPageNew';
 import Dashboard from './components/Dashboard';
 import PaymentRecord from './components/PaymentRecord';
 import SettingsPage from './components/SettingsPage';
 import Settlement from './components/Settlement';
 import History from './components/History';
-import GroupDetail from './components/GroupDetail';
+import GroupRedirect from './components/GroupRedirect';
 import JoinGroup from './components/JoinGroup';
 import AddExpense from './components/AddExpense';
 import SettlementCalculator from './components/SettlementCalculator';
@@ -17,8 +17,6 @@ import { useGroupStore } from './store/groupStore';
 const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'front' | 'dashboard' | 'groups' | 'settings' | 'payment' | 'settlement' | 'history'>('front');
   const [isGroupCreated, setIsGroupCreated] = useState(false);
-  const navigate = useNavigate();
-  const { groupId } = useParams<{ groupId: string }>();
 
 
   // フロントページからダッシュボードへの遷移を処理
@@ -100,7 +98,6 @@ const AppContent: React.FC = () => {
 const BottomNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { groups } = useGroupStore();
   
   // 現在のページを判定
   const getCurrentPage = () => {
@@ -169,7 +166,7 @@ const App: React.FC = () => {
         <Route path="/" element={<AppContent />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/group/create" element={<FrontPageNew />} />
-        <Route path="/group/:shareId" element={<GroupDetail />} />
+        <Route path="/group/:shareId" element={<GroupRedirect />} />
         <Route path="/join/:shareId" element={<JoinGroup />} />
         <Route path="/group/:shareId/add-expense" element={<AddExpense />} />
         <Route path="/group/:shareId/settlement" element={<SettlementCalculator />} />

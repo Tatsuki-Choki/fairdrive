@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useParams, useNavigate } from 'react-router-dom'
 import { 
-  ArrowLeft, 
   Share2, 
-  Copy, 
   Check, 
   Users, 
   Plus,
   Fuel,
-  Calendar,
-  DollarSign,
   Car,
   Receipt,
   CreditCard,
@@ -18,7 +13,6 @@ import {
   Clock,
   Smartphone
 } from 'lucide-react'
-import { MonochromeHeader } from './organisms/MonochromeHeader'
 import { MonochromeButton } from './atoms/MonochromeButton'
 import { MonochromeCard } from './atoms/MonochromeCard'
 import { supabase } from '../lib/supabase'
@@ -28,9 +22,11 @@ type Group = Database['public']['Tables']['groups']['Row']
 type Member = Database['public']['Tables']['members']['Row']
 type Expense = Database['public']['Tables']['expenses']['Row']
 
-const GroupDetail: React.FC = () => {
-  const { shareId } = useParams<{ shareId: string }>()
-  const navigate = useNavigate()
+interface GroupDetailProps {
+  groupId: string
+}
+
+const GroupDetail: React.FC<GroupDetailProps> = ({ groupId }) => {
   const [group, setGroup] = useState<Group | null>(null)
   const [members, setMembers] = useState<Member[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
@@ -38,11 +34,11 @@ const GroupDetail: React.FC = () => {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (shareId) {
+    if (groupId) {
       fetchGroupData()
       subscribeToUpdates()
     }
-  }, [shareId])
+  }, [groupId])
 
   const fetchGroupData = async () => {
     try {
@@ -50,7 +46,7 @@ const GroupDetail: React.FC = () => {
       const { data: groupData, error: groupError } = await supabase
         .from('groups')
         .select('*')
-        .eq('share_id', shareId)
+        .eq('id', groupId)
         .single()
 
       if (groupError) throw groupError
@@ -83,18 +79,18 @@ const GroupDetail: React.FC = () => {
   }
 
   const subscribeToUpdates = () => {
-    if (!shareId) return
+    if (!groupId) return
 
     // グループの変更を監視
     const groupSubscription = supabase
-      .channel(`group-${shareId}`)
+      .channel(`group-${groupId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'groups',
-          filter: `share_id=eq.${shareId}`
+          filter: `id=eq.${groupId}`
         },
         (payload) => {
           if (payload.eventType === 'UPDATE') {
@@ -106,7 +102,7 @@ const GroupDetail: React.FC = () => {
 
     // メンバーの変更を監視
     const membersSubscription = supabase
-      .channel(`members-${shareId}`)
+      .channel(`members-${groupId}`)
       .on(
         'postgres_changes',
         {
@@ -122,7 +118,7 @@ const GroupDetail: React.FC = () => {
 
     // 支払いの変更を監視
     const expensesSubscription = supabase
-      .channel(`expenses-${shareId}`)
+      .channel(`expenses-${groupId}`)
       .on(
         'postgres_changes',
         {
@@ -144,7 +140,7 @@ const GroupDetail: React.FC = () => {
   }
 
   const handleCopyShareUrl = async () => {
-    const shareUrl = `${window.location.origin}/join/${shareId}`
+    const shareUrl = `${window.location.origin}/join/${group?.share_id}`
     try {
       await navigator.clipboard.writeText(shareUrl)
       setCopied(true)
@@ -247,14 +243,9 @@ const GroupDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-dark-base text-light-primary pb-32">
-      <MonochromeHeader
-        title={group.name}
-        showBackButton={true}
-        onBackClick={() => navigate('/')}
-      />
 
       <motion.div
-        className="px-3 pt-20 pb-6 max-w-md mx-auto"
+        className="px-3 pb-6 max-w-md mx-auto"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -316,7 +307,7 @@ const GroupDetail: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate(`/group/${shareId}/add-expense`)}
+            onClick={() => window.location.href = `/group/${group?.share_id}/add-expense`}
             className="bg-light-primary text-dark-base rounded-2xl p-4 flex flex-col items-center gap-2 font-semibold shadow-glass"
           >
             <Plus size={24} />
@@ -326,7 +317,7 @@ const GroupDetail: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate(`/group/${shareId}/settlement`)}
+            onClick={() => window.location.href = `/group/${group?.share_id}/settlement`}
             className="bg-white/[0.04] backdrop-blur-glass rounded-2xl p-4 flex flex-col items-center gap-2 font-semibold shadow-glass border border-dark-border"
           >
             <CreditCard size={24} />

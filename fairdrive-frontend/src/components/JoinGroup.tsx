@@ -5,6 +5,7 @@ import { Users, LogIn, Loader2, Plus } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { Database } from '../types/supabase'
 import MemberExistsPopup from './MemberExistsPopup'
+import { useGroupStore } from '../store/groupStore'
 
 type Group = Database['public']['Tables']['groups']['Row']
 type Member = Database['public']['Tables']['members']['Row']
@@ -91,8 +92,10 @@ const JoinGroup: React.FC = () => {
         if (memberError) throw memberError
       }
 
-      // グループ詳細画面へ遷移（既存メンバーでも新規メンバーでも）
-      navigate(`/group/${shareId}`)
+      // selectedGroupIdをセットしてダッシュボードへ遷移
+      const { setSelectedGroupId } = useGroupStore.getState()
+      setSelectedGroupId(group.id)
+      navigate('/dashboard')
     } catch (err) {
       console.error('Error joining group:', err)
       setError('グループへの参加に失敗しました')
@@ -105,7 +108,11 @@ const JoinGroup: React.FC = () => {
   const handleJoinAsExisting = () => {
     setShowDuplicatePopup(false)
     // 既存メンバーとして参加（新規追加しない）
-    navigate(`/group/${shareId}`)
+    if (group) {
+      const { setSelectedGroupId } = useGroupStore.getState()
+      setSelectedGroupId(group.id)
+      navigate('/dashboard')
+    }
   }
 
   const handleJoinAsNew = () => {
